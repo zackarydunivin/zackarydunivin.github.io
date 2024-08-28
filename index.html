@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap" rel="stylesheet">
   
   <style>
-   body {
+  body {
   background-color: #1e1e1e; /* Dark gray background */
   color: #dcdcdc; /* Slightly brighter gray text */
   font-family: 'Inconsolata', monospace;
@@ -63,18 +63,19 @@ img {
   text-align: justify;
   text-justify: inter-word;
   line-height: 1.6;
+  padding: 0 20px 0 20px;
 }
 
 .papers {
   max-width: 800px;
-  margin-top: 40px;
-  padding-right: 20px;
+  margin-top: 0px;
+  padding: 0 20px 0 20px;
 }
 
 .papers h2 {
   font-family: 'Chakra Petch';
   font-size: 1.8em;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
   color: #9cdcfe; /* Lighter blue for section headers */
 }
 
@@ -104,17 +105,17 @@ img {
   color: #e06c75; /* Muted red on hover */
 }
 
+/* Soft purple for the second publication */
 .papers .pub2 {
-   color: #a988d1; /* Soft purple for the second publication */
+  color: #c678dd;
 }
-
 
 /* Media Queries */
 @media (min-width: 768px) {
   body {
     flex-direction: row;
     align-items: flex-start;
-    padding: 50px;
+    /* padding: 50px; */
     overflow: hidden; /* Prevents scrolling */
   }
   .left-side {
@@ -132,6 +133,7 @@ img {
     flex: 2;
     overflow-y: auto;
     height: 100vh;
+    padding-top: 20px; /* Add padding to the top when wide */
   }
 }
 
@@ -139,14 +141,15 @@ img {
   body {
     flex-direction: column;
     overflow-y: auto; /* Allows scrolling */
+    padding: 0 0; /* Optional padding for the body */
   }
   .left-side,
   .right-side {
     overflow-y: auto;
     height: auto;
+    padding-left: 0 20px 0 20px; /* Add padding to left and right divs on mobile */
   }
 }
-
 
   </style>
 </head>
