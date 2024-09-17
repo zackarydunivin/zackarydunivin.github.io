@@ -1,0 +1,163 @@
+body {
+  background-color: #1e1e1e; /* Dark gray background */
+  color: #dcdcdc; /* Slightly brighter gray text */
+  font-family: 'Inconsolata', monospace;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+h1 {
+  font-family: 'Chakra Petch';
+  font-size: 3em;
+  margin-bottom: 20px;
+  color: #61afef; /* Brighter blue for the main header */
+  text-align: center;
+}
+
+img {
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 15px;
+  border: 3px solid #dcdcdc; /* Light gray border */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.links {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.links a {
+  color: #e5c07b; /* Brighter gold for links */
+  margin: 0 15px;
+  text-decoration: none;
+  font-size: 1.2em;
+}
+
+.links a:hover {
+  color: #e06c75; /* Muted red on hover */
+}
+
+/* Styles for Orbiting Links */
+.planet-link {
+  color: #e5c07b; /* Same gold color as .links a */
+  margin: 0; /* Remove margin as positioning is handled via JavaScript */
+  text-decoration: none;
+  font-size: 1.2em;
+  /*background: rgba(30, 30, 30, 0.8); /* Semi-transparent background */
+  padding: 10px 15px; /* Padding for better click area */
+  border-radius: 0; /* Square borders */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  z-index: 10; /* Ensure links are above the canvas */
+  transition: color 0.3s ease, background 0.3s ease; /* Smooth transition */
+}
+
+.planet-link:hover {
+  color: #e06c75; /* Same hover color as .links a */
+  /* background: rgba(224, 108, 117, 0.8); /* Change background on hover */
+}
+
+.bio {
+  margin: 30px 0;
+  max-width: 600px;
+  text-align: justify;
+  text-justify: inter-word;
+  line-height: 1.6;
+  padding: 0 20px 0 20px;
+}
+
+.papers {
+  max-width: 800px;
+  margin-top: 0px;
+  padding: 0px 20px 0 20px;
+}
+
+.papers h2 {
+  font-family: 'Chakra Petch';
+  font-size: 1.8em;
+  margin-bottom: 0px;
+  color: #9cdcfe; /* Lighter blue for section headers */
+}
+
+.papers p {
+  font-size: 1.1em;
+  line-height: 1.8;
+  margin-bottom: 20px;
+  text-align: justify;
+  text-justify: inter-word;
+  color: #dcdcdc; /* Light gray text */
+}
+
+.papers p b {
+  font-weight: bold;
+}
+
+.papers p i {
+  font-style: italic;
+}
+
+.papers p a {
+  color: #e5c07b; /* Brighter gold for links */
+  text-decoration: none;
+}
+
+.papers p a:hover {
+  color: #e06c75; /* Muted red on hover */
+}
+
+/* Soft purple for the second publication */
+.papers .pub2 {
+  color: #c678dd;
+}
+
+/* Media Queries */
+@media (min-width: 768px) {
+  body {
+    flex-direction: row;
+    align-items: flex-start;
+    /* padding: 50px; */
+    overflow: hidden; /* Prevents scrolling */
+  }
+  .left-side {
+    flex: 1;
+    margin-right: 0px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    /* display: flex; */
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+  }
+  .right-side {
+    flex: 2;
+    overflow-y: auto;
+    height: 100vh;
+    padding-top: 10vh; /* Add padding to the top when wide */
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    flex-direction: column;
+    overflow-y: auto; /* Allows scrolling */
+    padding: 0 0; /* Optional padding for the body */
+  }
+  .bio,
+  .right-side {
+    overflow-y: auto;
+    height: auto;
+    padding: 0 20px 0 20px; /* Add padding to left and right divs on mobile */
+  }
