@@ -20,14 +20,18 @@ h1 {
 }
 
 img {
-  border-radius: 50%;
-  width: 150px;
-  height: 150px;
+
   margin-bottom: 15px;
-  border: 3px solid #dcdcdc; /* Light gray border */
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+#headshot {
+  border-radius: 50%;
+  border: 3px solid rgb(58, 63, 65); /* Dark gray border */
+  width: 150px;
+  height: 150px;
 }
 
 .links {
