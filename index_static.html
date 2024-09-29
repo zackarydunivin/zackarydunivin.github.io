@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GJ7JP35W8X"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-GJ7JP35W8X');
+  </script>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5K5KCDJR');</script>
+    <!-- End Google Tag Manager -->
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Zackary Okun Dunivin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5K5KCDJR"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  <div class="left-side">
+  	<div class="bio">
+    <h1>zackary okun dunivin</h1>
+    <img src="images/headshot_taipei_apt.png" alt="zackary's headshot" id="headshot">
+    <div class="links">
+      <a href="pdfs/dunivin_CV.pdf" target="_blank">cv</a>
+      <a href="https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en" target="_blank">scholar</a>
+      <a href="mailto:zdunivin@ucdavis.edu">email</a>
+    </div>
+    </div>
+    <div class="bio">
+      <p>Howdy! I'm a computational methodologist, cultural sociologist, and complexity scholar. Most of my research uses large, scraped, and crowdsourced data to examine culture and cultural change. What most excites me about culture is how much of human experience it touches. My work variously intersects with political communication, media studies, race and gender studies, digital humanities, social movements, decision science, and organizational behavior.</p>
+      
+      <p>I have a PhD in Complex Systems (Informatics) and Sociology from Indiana University. My undergraduate studies at Reed College were in Evolutionary and Molecular Biology.</p>
+      
+      <p>Currently I'm at UC Davis as a post-doctoral scholar working on organizational communication and institutional studies. Recently I've been using LLMs to do social science.</p>
+    </div>
+  </div>
+  <div id="publications-container" class="right-side papers"></div>
+
+  <script>
+    fetch('publications.html')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
+      .then(data => {
+        document.getElementById('publications-container').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading publications:', error));
+  </script>
+
+</body>
