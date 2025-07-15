@@ -1,3 +1,11 @@
+html {
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
 body {
   background-color: #1e1e1e; /* Dark gray background */
   color: #dcdcdc; /* Slightly brighter gray text */
