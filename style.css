@@ -37,7 +37,7 @@ img {
 
 #headshot {
   border-radius: 50%;
-  border: 3px solid rgb(58, 63, 65); /* Dark gray border */
+  border: 3px solid rgb(110, 113, 100); /* Dark gray border */
   width: 150px;
   height: 150px;
 }
@@ -133,6 +133,22 @@ img {
   color: #c678dd;
 }
 
+.left-side {
+  padding-right: 1.5rem;      /* inner edge of the left column */
+  max-width: 680px;         /* keep lines readable */
+  box-sizing: border-box;
+}
+
+.right-side {
+  padding-left: 1.5rem;       /* inner edge of the right column */
+  max-width: 800px;         /* right column often holds lists -> a hair wider */
+  box-sizing: border-box;
+}
+
+/* If your bio had a max-width/centering, let it fill the column */
+.left-side .bio { max-width: none; margin: 0; }
+
+
 /* Media Queries */
 @media (min-width: 768px) {
   body {
@@ -153,6 +169,14 @@ img {
     justify-content: center;
     overflow-y: auto;
   }
+
+  .left-side .bio {
+    width: 100%;
+    max-width: none;
+    margin: 0;           /* prevents centering */
+    padding-right: 0;    /* remove stray right padding if any */
+    box-sizing: border-box;
+  }
   .right-side {
     flex: 2;
     overflow-y: auto;
@@ -160,6 +184,7 @@ img {
     padding-top: 10vh; /* Add padding to the top when wide */
   }
 }
+
 
 @media (max-width: 767px) {
   body {
