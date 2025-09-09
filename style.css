@@ -155,7 +155,7 @@ img {
     flex-direction: row;
     align-items: flex-start;
     /* padding: 50px; */
-    overflow: hidden; /* Prevents scrolling */
+    /*overflow: hidden; /* Prevents scrolling */
   }
   .left-side {
     flex: 1;

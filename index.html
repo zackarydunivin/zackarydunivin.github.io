@@ -66,7 +66,7 @@
         based at the University of Stuttgart. My work addresses AI as a socio-cultural object, ethical alignment, and LLMs as tools for conducting social research.
       </p>
       
-      <p><span style="color: #e06c75;">I'm on the job market for 2026!</span> If you know of openings that fit my profile, please let me know.</span></p>
+      <p><span style="color: #e06c75;">I'm on the job market for 2026!</span> If you know of openings that fit my profile, please let me know.</p>
     </div>
   </div>
   <div id="publications-container" class="right-side papers"></div>
@@ -76,7 +76,8 @@
     function isMobileDevice() {
       return /Mobi|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
-  
+
+
     fetch('publications.html')
       .then(response => {
         if (!response.ok) {
@@ -96,55 +97,48 @@
         }
       })
       .catch(error => console.error('Error loading publications:', error));
-  
-    // Function to display the static links on mobile devices
-    function displayStaticLinks() {
-      const linksContainer = document.getElementById('links-or-canvas');
-      linksContainer.innerHTML = `
-        <div class="links">
-          <a href="pdfs/dunivin_CV.pdf" target="_blank">cv</a>
-          <a href="https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en" target="_blank">scholar</a>
-          <a href="mailto:zdunivin@ucdavis.edu">email</a>
-        </div>
-      `;
-    }
-  
-    // Function to initialize the orbiting links
-    function initializeOrbitingLinks() {
+      
+      // Function to display the static links on mobile devices
+      function displayStaticLinks() {
+        const linksContainer = document.getElementById('links-or-canvas');
+        linksContainer.innerHTML = `
+          <div class="links">
+            <a href="pdfs/dunivin_CV.pdf" target="_blank">cv</a>
+            <a href="https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en" target="_blank">scholar</a>
+            <a href="mailto:zdunivin@ucdavis.edu">email</a>
+          </div>
+        `;
+      }
+      // Function to initialize the orbiting links
+      function initializeOrbitingLinks() {
       // Get the canvas and context
       var canvas = document.createElement('canvas');
       canvas.id = 'overlayCanvas';
       var ctx = canvas.getContext('2d');
-  
+      
       // Append the canvas to the links-or-canvas div
       var linksOrCanvasContainer = document.getElementById('links-or-canvas');
-      // linksOrCanvasContainer.appendChild(canvas);
-      document.body.appendChild(canvas);        // attach to body
-      canvas.style.position = 'fixed';          // pin to viewport
-      canvas.style.left = '0';
-      canvas.style.top  = '0';
-      canvas.style.zIndex = '999';              // stays visible, still click-through
-      canvas.style.pointerEvents = 'none';      // you already had this
-            // --- IMPORTANT: let clicks go through the canvas (so page links are clickable) ---
+      linksOrCanvasContainer.appendChild(canvas);
+      
+      // let pointer events fall through to real HTML links beneath
       canvas.style.pointerEvents = 'none';
-  
+
       // Get device pixel ratio
       var dpr = window.devicePixelRatio || 1;
-  
+
       // Function to resize canvas and scale context
       function resizeCanvas() {
         // Set display size (css pixels)
         var displayWidth = window.innerWidth;
         var displayHeight = window.innerHeight;
-  
+
         // Set the canvas size in device pixels
         canvas.width = displayWidth * dpr;
         canvas.height = displayHeight * dpr;
-  
-        // Reset transform then scale for DPR (avoids compounded scaling on resize)
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Scale the context to account for device pixel ratio
         ctx.scale(dpr, dpr);
-  
+
         // Update canvas style to match display size
         canvas.style.width = displayWidth + 'px';
         canvas.style.height = displayHeight + 'px';
@@ -152,17 +146,17 @@
         canvas.style.top = '0';
         canvas.style.left = '0';
       }
-  
+
       // Initial canvas setup
       resizeCanvas();
-  
+
       // Font settings
       var fontSize = 1.3;
       var fontFamily = 'Inconsolata';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
-  
-      // Orbiting links data (unchanged)
+
+      // Orbiting links data
       var links = [
         {
           char: 'cv',
@@ -189,29 +183,29 @@
           speed: 0.0045
         }
       ];
-  
+
       // Get the headshot image element
       var headshot = document.getElementById('headshot');
-  
+
       // Variable to store headshot position
       var headshotPos = getHeadshotPosition();
-  
-      // Variable to store mouse position (in PAGE coords * dpr)
+
+      // Variable to store mouse position
       var mouseX = 0;
       var mouseY = 0;
-  
+
       // Update headshot position on load and resize
-      window.addEventListener('load', function () {
+      window.addEventListener('load', function() {
         headshotPos = getHeadshotPosition();
       });
-      window.addEventListener('resize', function () {
+      window.addEventListener('resize', function() {
         resizeCanvas();
         headshotPos = getHeadshotPosition();
       });
-      window.addEventListener('scroll', function () {
+      window.addEventListener('scroll', function() {
         headshotPos = getHeadshotPosition();
       });
-  
+
       // Function to get the position of the headshot image
       function getHeadshotPosition() {
         var rect = headshot.getBoundingClientRect();
@@ -223,52 +217,50 @@
           radius: (rect.width / 2) * dpr
         };
       }
-  
-      // --------- REPLACED LISTENERS: use document-level events ---------
-  
-      // Mouse move: track mouse in PAGE coords and update hover/cursor
-      document.addEventListener('mousemove', function (e) {
-        mouseX = (e.clientX + window.scrollX) * dpr;
-        mouseY = (e.clientY + window.scrollY) * dpr;
-  
-        var anyHovering = false;
-  
-        links.forEach(function (link) {
+
+      // Mouse move event to track mouse position and hover state
+      canvas.addEventListener('mousemove', function(e) {
+        var rect = canvas.getBoundingClientRect();
+        mouseX = (e.clientX - rect.left) * dpr;
+        mouseY = (e.clientY - rect.top) * dpr;
+
+        var anyHovering = false; // Flag to track if any link is being hovered
+
+        links.forEach(function(link) {
           var wasHovering = link.hovering;
           link.hovering = isMouseOverlink(link);
-  
+
           // If hover state changed, adjust speed
           if (link.hovering && !wasHovering) {
-            link.speed = 0; // Stop movement on hover
+            link.speed = 0; // Stop the link's movement
           } else if (!link.hovering && wasHovering) {
             link.speed = 0.0045; // Resume movement
           }
-          if (link.hovering) anyHovering = true;
-        });
-  
-        document.body.style.cursor = anyHovering ? 'pointer' : 'default';
-      }, { passive: true });
-  
-      // Click: if over a label, follow it; otherwise let native clicks work
-      document.addEventListener('click', function (e) {
-        for (var i = 0; i < links.length; i++) {
-          if (isMouseOverlink(links[i])) {
-            e.preventDefault();
-            e.stopPropagation();
-            window.location.href = links[i].link;
-            return;
+
+          if (link.hovering) {
+            anyHovering = true; // At least one link is being hovered over
           }
-        }
-        // not over an orbit label -> native click proceeds
+        });
+
+        // Update cursor style based on hover state
+        canvas.style.cursor = anyHovering ? 'pointer' : 'default';
       });
-  
-      // Function to check if mouse is over a link (unchanged logic)
+
+      // Click event to handle clicks on links
+      linksOrCanvasContainer.addEventListener('click', function(e) {
+        links.forEach(function(link) {
+          if (isMouseOverlink(link)) window.location.href = link.link;
+        });
+      });
+
+      // Function to check if mouse is over a link
       function isMouseOverlink(link) {
         ctx.font = fontSize + 'em ' + fontFamily;
         var textMetrics = ctx.measureText(link.char);
         var textWidth = textMetrics.width;
         var textHeight = parseFloat(window.getComputedStyle(document.body).fontSize) * fontSize * dpr;
-  
+        var hoverPadding = 10 * dpr; // Increase this value to make the hover area larger
+
         return (
           mouseX >= link.x - textWidth / 2 &&
           mouseX <= link.x + textWidth / 2 &&
@@ -276,74 +268,74 @@
           mouseY <= link.y + textHeight / 2
         );
       }
-  
-      // Animation loop (unchanged drawing & styling)
+
+      // Animation loop
       function animate() {
         ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-  
+
         // Update and draw each link
-        links.forEach(function (link) {
+        links.forEach(function(link) {
           // Update angle
           link.angle += link.speed;
-  
+
           // Calculate position based on elliptical orbit
           var orbit = link.orbit;
           var angle = link.angle;
           var rotation = orbit.rotation;
-  
+
           var cosAngle = Math.cos(angle);
           var sinAngle = Math.sin(angle);
           var cosRotation = Math.cos(rotation);
           var sinRotation = Math.sin(rotation);
-  
+
           var x =
             headshotPos.x + headshotPos.width / 2 +
             (orbit.a * cosAngle * cosRotation - orbit.b * sinAngle * sinRotation) * dpr;
           var y =
             headshotPos.y + headshotPos.height / 2 +
             (orbit.a * cosAngle * sinRotation + orbit.b * sinAngle * cosRotation) * dpr;
-  
+
           link.x = x;
           link.y = y;
-  
-          // Draw the link (your exact look)
+
+          // Draw the link
           drawlink(link);
         });
-  
+
         requestAnimationFrame(animate);
       }
-  
-      // Function to draw a link (your original styling preserved)
+
+      // Function to draw a link
       function drawlink(link) {
         // Set font settings
         ctx.font = fontSize + 'em ' + fontFamily;
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
-  
+
         // Determine fill style
         var fillStyle = '#e5c07b'; // Default color
         if (link.hovering) {
           fillStyle = '#e06c75'; // Hover color
         }
-  
+
         // Draw the link normally
         ctx.fillStyle = fillStyle;
         ctx.fillText(link.char, link.x / dpr, link.y / dpr);
-  
+
         // Save the context state
         ctx.save();
-  
+
         // Create circular clipping path for the headshot
         ctx.beginPath();
         ctx.arc(
           (headshotPos.x + headshotPos.width / 2) / dpr,
           (headshotPos.y + headshotPos.height / 2) / dpr,
-          headshotPos.radius / dpr - 3,
+          headshotPos.radius / dpr -3,
           0,
           Math.PI * 2
         );
         ctx.clip();
-  
+
         // Draw the overlapping part
         if (!link.hovering) {
           ctx.fillStyle = '#1e1e1e'; // Background color when not hovering
@@ -351,11 +343,11 @@
           ctx.fillStyle = '#e06c75'; // Hover color
         }
         ctx.fillText(link.char, link.x / dpr, link.y / dpr);
-  
+
         // Restore the context state
         ctx.restore();
       }
-  
+
       // Start the animation
       animate();
     }
