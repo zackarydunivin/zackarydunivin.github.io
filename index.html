@@ -41,6 +41,16 @@
     .lang-links a:link,
     .lang-links a:visited { color: #e5c07b !important; text-decoration: none !important; }
     .lang-links a:hover   { color: #e06c75 !important; }
+    .dissertation-link,
+    .dissertation-link:visited,
+    .dissertation-link:hover,
+    .dissertation-link:active,
+    .dissertation-link:focus {
+      color: inherit;
+      text-decoration: none;
+      outline: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -56,20 +66,20 @@
       <div style="padding-bottom: 0px;"></div> 
       <div id="links-or-canvas"></div> 
       <p>Howdy! I'm a computational methodologist, cultural sociologist, and complexity scholar. Most of my research uses large, scraped, and crowdsourced data to examine culture and cultural change. What most excites me about culture is how much of human experience it touches.
-        My work variously intersects with political communication, media studies, <!--race and gender studies,--> digital humanities, social movements, decision science, and organizational behavior. 
+        My work variously intersects with political communication, media studies, <!--race and gender studies,--> digital humanities, social movements, public policy, and organizational behavior.
         
         <p>Over the past two years my research has focused on orienting AI systems in social theory across ethical alignment, social science methodology, and the future of work/science.</p>
       
-      <p>I have a PhD in Complex Systems (Informatics) and Sociology from Indiana University. My undergraduate studies at Reed College were in Evolutionary and Molecular Biology.</p>
+      <p>I have a <a class="dissertation-link" href="pdfs/dunivin_dissertation_web.pdf">PhD</a> in Sociology and Complex Systems (Informatics) from Indiana University. My undergraduate studies at Reed College were in Evolutionary and Molecular Biology.</p>
       
       <p>
-        Beginning this year, I am a post-doctoral fellow in the Baden-Württemberg Special Program for International Academic Freedom
+        I am a post-doctoral fellow in the Baden-Württemberg Special Program for International Academic Freedom
         <span class="lang-links" role="group" aria-label="Language links for the program page">[<a href="https://www.bwstiftung.de/de/programm/sonderprogramm-fuer-internationale-wissenschaftsfreiheit" target="_blank" rel="noopener">DE</a>
           <span class="sep" aria-hidden="true">/</span> <a href="https://translate.google.com/translate?sl=de&tl=en&u=https%3A%2F%2Fwww.bwstiftung.de%2Fde%2Fprogramm%2Fsonderprogramm-fuer-internationale-wissenschaftsfreiheit" target="_blank" rel="noopener">EN</a>]</span>
-        based at the University of Stuttgart.<!--My research addresses AI as a socio-cultural object, ethical alignment, and LLMs as tools for conducting social research.-->
+        based at the Institute for Social Science at the University of Stuttgart.<!--My research addresses AI as a socio-cultural object, ethical alignment, and LLMs as tools for conducting social research.-->
       </p>
       
-      <p><span style="color: #e06c75;">I'm on the job market for 2026!</span> If you know of openings that fit my profile, please do reach out.</p>
+      <p><span style="color: #e06c75;">I'm on the job market for 2027!</span> If you know of openings that fit my profile, please do reach out.</p>
     </div>
   </div>
   <div id="publications-container" class="right-side papers"></div>
@@ -96,7 +106,7 @@
       linksContainer.innerHTML = `
         <div class="links">
           <a href="pdfs/dunivin_CV.pdf" target="_blank">cv</a>
-          <a href="https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en" target="_blank">scholar</a>
+          <a href="https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en" target="_blank" aria-label="Google Scholar" title="Google Scholar"><span class="scholar-icon" aria-hidden="true"></span>scholar</a>
           <a href="mailto:zackary.dunivin@sowi.uni-stuttgart.de">email</a>
         </div>
       `;
@@ -141,10 +151,28 @@
       // Links state (positions in CSS px)
       const links = [
         { char: 'cv',      angle: 0,                    orbit: { a: 125, b: 60, rotation: 0 },             hovering: false, link: 'pdfs/dunivin_CV.pdf', speed: 0.0045 },
-        { char: 'scholar', angle: (2 * Math.PI) / 3,    orbit: { a: 100, b: 90, rotation: Math.PI / 6 },   hovering: false, link: 'https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en', speed: 0.0045 },
+        { char: 'scholar', icon: true, angle: (2 * Math.PI) / 3,    orbit: { a: 100, b: 90, rotation: Math.PI / 6 },   hovering: false, link: 'https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en', speed: 0.0045 },
         { char: 'email',   angle: (4 * Math.PI) / 3,    orbit: { a: 100, b: 75, rotation: Math.PI / 4 },   hovering: false, link: 'mailto:zdunivin@ucdavis.edu', speed: 0.0045 }
       ];
   
+      // Tint the transparent Scholar icon to match the other orbiting links.
+      const scholarImage = new Image();
+      const scholarIcons = {};
+      scholarImage.onload = () => {
+        for (const color of ['#e5c07b', '#e06c75', '#1e1e1e']) {
+          const icon = document.createElement('canvas');
+          icon.width = scholarImage.naturalWidth;
+          icon.height = scholarImage.naturalHeight;
+          const iconContext = icon.getContext('2d');
+          iconContext.drawImage(scholarImage, 0, 0);
+          iconContext.globalCompositeOperation = 'source-in';
+          iconContext.fillStyle = color;
+          iconContext.fillRect(0, 0, icon.width, icon.height);
+          scholarIcons[color] = icon;
+        }
+      };
+      scholarImage.src = 'images/google-scholar-g.svg';
+
       // Mouse (CSS px)
       let mouseX = 0, mouseY = 0;
   
@@ -175,8 +203,8 @@
   
       function isMouseOverLink(L, x = mouseX, y = mouseY) {
         ctx.font = fontSize + 'em ' + fontFamily;
-        const textWidth = ctx.measureText(L.char).width;
         const textHeight = parseFloat(getComputedStyle(document.body).fontSize) * fontSize;
+        const textWidth = ctx.measureText(L.char).width + (L.icon && scholarIcons['#e5c07b'] ? textHeight * 0.8 : 0);
         const pad = 10;
         return (
           x >= L.x - (textWidth / 2 + pad) &&
@@ -190,6 +218,20 @@
       const fontSize = 1.3;
       const fontFamily = 'Inconsolata';
   
+      function drawLabel(L) {
+        const icon = L.icon && scholarIcons[ctx.fillStyle];
+        if (icon) {
+          const size = parseFloat(getComputedStyle(document.body).fontSize) * fontSize * 0.8;
+          const textWidth = ctx.measureText(L.char).width;
+          const gap = 0;
+          const left = L.x - (size + gap + textWidth) / 2;
+          ctx.drawImage(icon, left, L.y - size / 2 + size * 0.1, size, size);
+          ctx.fillText(L.char, left + size + gap + textWidth / 2, L.y);
+        } else {
+          ctx.fillText(L.char, L.x, L.y);
+        }
+      }
+
       // Draw one label (CSS px)
       function drawLink(L) {
         ctx.font = fontSize + 'em ' + fontFamily;
@@ -197,7 +239,7 @@
         ctx.textAlign = 'center';
   
         ctx.fillStyle = L.hovering ? '#e06c75' : '#e5c07b';
-        ctx.fillText(L.char, L.x, L.y);
+        drawLabel(L);
   
         ctx.save();
         ctx.beginPath();
@@ -210,7 +252,7 @@
         ctx.clip();
   
         ctx.fillStyle = L.hovering ? '#e06c75' : '#1e1e1e';
-        ctx.fillText(L.char, L.x, L.y);
+        drawLabel(L);
         ctx.restore();
       }
   
