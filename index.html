@@ -30,7 +30,7 @@
   <style>
     /* Styles for the canvas overlay */
     #overlayCanvas {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -114,22 +114,21 @@
   
     // Orbiting links for desktop
     function initializeOrbitingLinks() {
-      const linksOrCanvasContainer = document.getElementById('links-or-canvas');
       const headshot = document.getElementById('headshot');
   
       // Canvas
       const canvas = document.createElement('canvas');
       canvas.id = 'overlayCanvas';
-      canvas.style.position = 'absolute';
-      canvas.style.top = '0';
-      canvas.style.left = '0';
       canvas.style.pointerEvents = 'none'; // never block clicks
-      linksOrCanvasContainer.appendChild(canvas);
+      // Drawing and pointer events both use viewport coordinates. Keep the
+      // overlay outside the positioned, independently scrolling left column.
+      document.body.appendChild(canvas);
       const ctx = canvas.getContext('2d');
   
       // DPR-aware canvas; all math in CSS px
-      const dpr = window.devicePixelRatio || 1;
+      let dpr;
       function resizeCanvas() {
+        dpr = window.devicePixelRatio || 1;
         const w = window.innerWidth;
         const h = window.innerHeight;
         canvas.width = w * dpr;
@@ -258,6 +257,10 @@
   
       // Animation loop
       function animate() {
+        if (dpr !== (window.devicePixelRatio || 1)) resizeCanvas();
+        // Fonts, column scrolling, and responsive layout can all move the
+        // headshot without a window resize or window scroll event.
+        headshotPos = getHeadshotPosition();
         ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
   
         const cx = headshotPos.x + headshotPos.width / 2;
@@ -281,9 +284,7 @@
       }
   
       // Keep geometry fresh
-      window.addEventListener('resize', () => { resizeCanvas(); headshotPos = getHeadshotPosition(); });
-      window.addEventListener('scroll', () => { headshotPos = getHeadshotPosition(); }, { passive: true });
-      window.addEventListener('load', () => { headshotPos = getHeadshotPosition(); });
+      window.addEventListener('resize', resizeCanvas);
   
       animate();
     }
