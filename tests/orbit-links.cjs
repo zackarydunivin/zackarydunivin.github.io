@@ -20,78 +20,109 @@ const { chromium } = require('playwright');
           url.pathname === '/' ? 'index.html' : url.pathname) });
       });
       await page.addInitScript(() => {
-        // Advance the real animation deterministically, recording actual draws.
-        window.orbitTest = { draws: [], frames: 1 };
+        window.orbitTest = { frames: 1, clicks: [] };
         window.requestAnimationFrame = callback => { window.orbitTest.nextFrame = callback; };
-        const fillText = CanvasRenderingContext2D.prototype.fillText;
-        CanvasRenderingContext2D.prototype.fillText = function(text, x, y, ...rest) {
-          window.orbitTest.draws.push({ text, x, y });
-          return fillText.call(this, text, x, y, ...rest);
-        };
-        window.open = url => { window.orbitTest.opened = url; };
+        // Record real browser link activation without leaving the test page.
+        document.addEventListener('click', event => {
+          const anchor = event.target.closest('a');
+          if (anchor) {
+            window.orbitTest.clicks.push(anchor.getAttribute('href'));
+            event.preventDefault();
+          }
+        });
       });
       await page.goto('https://orbit.test/');
-      await page.waitForSelector('#overlayCanvas');
+      await page.waitForSelector('#orbit-links');
+      const links = page.locator('.orbit-link');
+      assert.equal(await links.count(), 3);
+      assert.equal(await page.locator('canvas').count(), 0);
 
-      async function check(label, advance = false) {
-        const result = await page.evaluate(advance => {
-          const test = window.orbitTest;
-          if (advance) {
-            test.draws = [];
-            test.nextFrame();
-            test.frames++;
+      async function advance(count = 1) {
+        await page.evaluate(count => {
+          for (let i = 0; i < count; i++) {
+            window.orbitTest.nextFrame();
+            window.orbitTest.frames++;
           }
-          const canvas = document.querySelector('#overlayCanvas');
-          const bounds = canvas.getBoundingClientRect();
+        }, count);
+      }
+      async function checkGeometry(label) {
+        const result = await page.evaluate(() => {
           const headshot = document.querySelector('#headshot').getBoundingClientRect();
-          const cv = test.draws.find(draw => draw.text === 'cv');
-          const expected = {
-            x: headshot.x + headshot.width / 2 + 125 * Math.cos(test.frames * 0.0045),
-            y: headshot.y + headshot.height / 2 + 60 * Math.sin(test.frames * 0.0045),
-          };
-          // Click where the label is actually painted, including canvas offset.
-          const destinations = {};
-          for (const text of ['cv', 'scholar', 'email']) {
-            const draw = test.draws.find(draw => draw.text === text);
-            test.opened = null;
-            document.dispatchEvent(new MouseEvent('click', {
-              clientX: bounds.x + draw.x, clientY: bounds.y + draw.y, ctrlKey: true,
-            }));
-            destinations[text] = test.opened;
-          }
-          return { origin: [bounds.x, bounds.y], cv, expected,
-            destinations, backingWidth: canvas.width,
-            expectedWidth: innerWidth * devicePixelRatio };
-        }, advance);
-        assert.deepEqual(result.origin, [0, 0], `${label}: canvas uses viewport origin`);
-        assert.ok(Math.abs(result.cv.x - result.expected.x) < 0.01, `${label}: orbit x follows headshot`);
-        assert.ok(Math.abs(result.cv.y - result.expected.y) < 0.01, `${label}: orbit y follows headshot`);
-        assert.deepEqual(result.destinations, {
-          cv: 'pdfs/dunivin_CV.pdf',
-          scholar: 'https://scholar.google.com/citations?user=qZadTtcAAAAJ&hl=en',
-          email: 'mailto:zdunivin@ucdavis.edu',
-        }, `${label}: all visible labels are clickable`);
-        assert.equal(result.backingWidth, result.expectedWidth, `${label}: pixel density`);
-        assert.deepEqual(errors, [], `${label}: browser errors`);
+          const layer = document.querySelector('#orbit-links').getBoundingClientRect();
+          const cv = document.querySelector('.orbit-link').getBoundingClientRect();
+          const angle = window.orbitTest.frames * 0.0045;
+          return { origin: [layer.x, layer.y],
+            actual: [cv.x + cv.width / 2, cv.y + cv.height / 2],
+            expected: [headshot.x + headshot.width / 2 + 125 * Math.cos(angle),
+              headshot.y + headshot.height / 2 + 60 * Math.sin(angle)] };
+        });
+        assert.deepEqual(result.origin, [0, 0]);
+        result.actual.forEach((value, i) => assert.ok(Math.abs(value - result.expected[i]) < 0.1, `${label}: orbit follows headshot`));
+        assert.deepEqual(errors, []);
         console.log(`PASS DPR ${deviceScaleFactor}: ${label}`);
       }
-
-      await check('wide window');
+      await checkGeometry('wide window');
       for (const width of [2560, 1100, 650, 1920]) {
         await page.setViewportSize({ width, height: 900 });
-        await page.waitForFunction(() => document.querySelector('canvas').width === innerWidth * devicePixelRatio, null, { polling: 50 });
-        await check(`resize to ${width}px`, true);
+        await advance();
+        await checkGeometry(`resize to ${width}px`);
       }
       await page.evaluate(() => {
         document.querySelector('.left-side').style.height = '350px';
         document.querySelector('.left-side').scrollTop = 65;
       });
-      await check('independent left-column scrolling', true);
+      await advance();
+      await checkGeometry('independent column scrolling');
       await page.evaluate(() => { document.querySelector('h1').style.marginBottom = '70px'; });
-      await check('layout shift without resize', true);
-      // Simulate the pixel ratio change caused by browser zoom / changing screens.
-      await page.evaluate(() => Object.defineProperty(window, 'devicePixelRatio', { value: 1.5 }));
-      await check('pixel ratio change after initialization', true);
+      await advance();
+      await checkGeometry('layout shift without resize');
+      await page.evaluate(() => {
+        document.querySelector('.left-side').style.height = '';
+        document.querySelector('.left-side').scrollTop = 0;
+        document.querySelector('h1').style.marginBottom = '';
+      });
+      await advance();
+
+      async function pointOnLabel(link) {
+        return link.locator('.orbit-label').first().evaluate(label => {
+          const r = label.getBoundingClientRect();
+          return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+        });
+      }
+      // Regression: first hover, leave without clicking, then re-enter and click.
+      for (let round = 0; round < 8; round++) {
+        for (const name of ['Google Scholar', 'email', 'cv']) {
+          const link = page.getByRole('link', { name, exact: true });
+          let point = await pointOnLabel(link);
+          await page.mouse.move(point.x, point.y);
+          const before = await link.boundingBox();
+          await advance(20);
+          assert.deepEqual(await link.boundingBox(), before, `${name}: pauses while hovered`);
+          assert.equal(await link.evaluate(a => getComputedStyle(a).color), 'rgb(224, 108, 117)');
+          await page.mouse.move(1800, 800);
+          await advance(30);
+          assert.notDeepEqual(await link.boundingBox(), before, `${name}: resumes after leaving`);
+          point = await pointOnLabel(link);
+          assert.equal(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest('a')?.getAttribute('href'), point), await link.getAttribute('href'), `${name}: visible label is browser hit target`);
+          await page.mouse.move(point.x, point.y);
+          await advance(10);
+          await page.mouse.click(point.x, point.y);
+          assert.equal(await page.evaluate(() => window.orbitTest.clicks.at(-1)), await link.getAttribute('href'), `${name}: activates after re-entry`);
+          await page.mouse.move(1800, 800);
+        }
+      }
+      assert.equal(await page.evaluate(() => window.orbitTest.clicks.length), 24);
+      console.log(`PASS DPR ${deviceScaleFactor}: 24 hover / leave / re-entry / native click sequences`);
+      const scholar = page.getByRole('link', { name: 'Google Scholar' });
+      await scholar.focus();
+      const focused = await scholar.boundingBox();
+      await advance(20);
+      assert.deepEqual(await scholar.boundingBox(), focused, 'keyboard focus pauses orbit');
+      await page.keyboard.press('Enter');
+      assert.equal(await page.evaluate(() => window.orbitTest.clicks.at(-1)), await scholar.getAttribute('href'));
+      assert.deepEqual(errors, []);
+      console.log(`PASS DPR ${deviceScaleFactor}: keyboard focus and activation`);
+      if (deviceScaleFactor === 1) await page.screenshot({ path: '/tmp/orbit-native-links.png' });
       await page.close();
     }
   } finally {
